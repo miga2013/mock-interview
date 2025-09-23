@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>모의 면접 프로그램 (고3)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .blink { animation: bl 1s steps(2, start) infinite; }
+    @keyframes bl { to { visibility: hidden; } }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-900">
+  <div class="max-w-5xl mx-auto p-6">
+    <header class="mb-6">
+      <h1 class="text-2xl font-bold">모의 면접 프로그램</h1>
+      <p class="text-sm text-slate-600">
+        답변 종료 → <span class="font-semibold">“답변 복사”</span> → <span class="font-semibold">“AI 피드백 받기”</span> 순서로 진행하세요.
+      </p>
+    </header>
+
+    <!-- 기본정보 -->
+    <section class="grid md:grid-cols-3 gap-4 mb-6">
+      <div>
+        <label class="block text-sm font-medium mb-1">학교/반/이름</label>
+        <input id="studentName" class="w-full rounded-xl border border-slate-300 px-3 py-2" placeholder="예) 3-2 홍길동" />
+      </div>
+      <div>
+        <label class="block text-sm font-medium mb-1">닉네임</label>
+        <input id="nickname" class="w-full rounded-xl border border-slate-300 px-3 py-2" placeholder="예) OO고_길동" />
+      </div>
+      <div>
+        <label class="block text-sm font-medium mb-1">성별</label>
+        <select id="gender" class="w-full rounded-xl border border-slate-300 px-3 py-2">
+          <option value="">선택</option>
+          <option>여</option>
+          <option>남</option>
+          <option>응답 안함</option>
+        </select>
+      </div>
+    </section>
+
+    <!-- 학과/문항 -->
+    <section class="grid md:grid-cols-2 gap-4 mb-6">
+      <div>
+        <label class="block text-sm font-medium mb-1">희망 학과</label>
+        <input id="major" class="w-full rounded-xl border border-slate-300 px-3 py-2" placeholder="예) 인공지능학과" />
+      </div>
+      <div>
+        <label class="block text-sm font-medium mb-1">면접 질문</label>
+        <select id="question" class="w-full rounded-xl border border-slate-300 px-3 py-2">
+          <option value="가. 자기소개 및 지원동기">가. 자기소개 및 지원동기</option>
+          <option value="나. 학업역량(교과·탐구·독서)">나. 학업역량(교과·탐구·독서)</option>
+          <option value="다. 전공적합성 활동 사례">다. 전공적합성 활동 사례</option>
+          <option value="라. 인성(협업·리더십·성실성)">라. 인성(협업·리더십·성실성)</option>
+          <option value="마. 발전가능성(학습계획·진로계획)">마. 발전가능성(학습계획·진로계획)</option>
+        </select>
+      </div>
+    </section>
+
+    <!-- 녹음/인식 -->
+    <section class="mb-4">
+      <div class="aspect-video bg-black/90 rounded-2xl flex items-center justify-center text-slate-200">
+        <div class="text-center">
+          <p id="recStatus" class="text-lg">대기 중</p>
+          <p id="timer" class="text-3xl font-semibold mt-1">00:00</p>
+        </div>
+      </div>
+
+      <div class="flex items-center flex-wrap gap-2 mt-4">
+        <button id="btnRecord" class="rounded-2xl px-4 py-2 bg-rose-600 text-white shadow">녹화</button>
+        <button id="btnPause" class="rounded-2xl px-4 py-2 bg-slate-200 text-slate-800" disabled>정지</button>
+        <button id="btnReset" class="rounded-2xl px-4 py-2 bg-slate-200 text-slate-800" disabled>재녹</button>
+        <button id="btnStop"  class="rounded-2xl px-4 py-2 bg-slate-800 text-white" disabled>종료</button>
+        <button id="btnSave" class="rounded-2xl px-4 py-2 bg-emerald-600 text-white shadow" disabled>저장(.webm)</button>
+        <span class="text-sm text-slate-500">* 브라우저에서 임시 저장</span>
+      </div>
+
+      <div class="mt-4">
+        <label class="block text-sm font-medium mb-1">실시간 음성인식 결과(수정 가능)</label>
+        <textarea id="transcript" class="w-full min-h-[140px] rounded-2xl border border-slate-300 p-3 outline-none" placeholder="말하면 자동 받아쓰기 됩니다. 미작동 시 직접 입력하세요."></textarea>
+        <div class="flex gap-2 mt-2">
+          <button id="btnCopy" class="rounded-xl px-3 py-2 bg-slate-800 text-white">답변 복사</button>
+          <button id="btnFeedback" class="rounded-xl px-3 py-2 bg-indigo-600 text-white">AI 피드백 받기</button>
+        </div>
+      </div>
+
+      <div id="feedbackBox" class="mt-4 hidden">
+        <label class="block text-sm font-medium mb-1">AI 피드백</label>
+        <div id="feedback" class="rounded-2xl border border-slate-300 p-4 bg-white text-sm whitespace-pre-wrap"></div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    /********* 설정(여기만 바꾸세요) *********/
+    const ENDPOINT = 'https://mock-interview.junseohan2013.workers.dev/feedback'; // Cloudflare Worker URL
+    /*****************************************/
+
+    // ?k=토큰 → localStorage 저장
+    (function saveTokenFromURL(){
+      const u = new URL(location.href);
+      const k = u.searchParams.get('k');
+      if (k) localStorage.setItem('mm_key', k);
+    })();
+
+    // 상태
+    let mediaRecorder, chunks = [], isRecording = false, timerId;
+    let recognition, speechSupported = false, startedAt = 0;
+
+    // 타이머
+    function fmt(sec){ const m=String(Math.floor(sec/60)).padStart(2,'0'); const s=String(sec%60).padStart(2,'0'); return `${m}:${s}`; }
+    function startTimer(){ startedAt = Date.now(); timerId = setInterval(()=> {
+      const sec = Math.floor((Date.now()-startedAt)/1000);
+      document.getElementById('timer').textContent = fmt(sec);
+    }, 300);}
+    function stopTimer(){ clearInterval(timerId); }
+
+    // 음성인식
+    (function initSR(){
+      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SR) return;
+      recognition = new SR();
+      recognition.lang = 'ko-KR';
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      let finalText = '';
+      recognition.onresult = e => {
+        let interim = '';
+        for (let i=e.resultIndex; i<e.results.length; i++){
+          const tr = e.results[i][0].transcript;
+          if (e.results[i].isFinal) finalText += tr + ' ';
+          else interim += tr;
+        }
+        transcript.value = (finalText + interim).trim();
+      };
+      recognition.onend = ()=>{ if(isRecording) recognition.start(); };
+      speechSupported = true;
+    })();
+
+    // 녹음
+    async function startRec(){
+      const stream = await navigator.mediaDevices.getUserMedia({ audio:true });
+      mediaRecorder = new MediaRecorder(stream);
+      chunks = [];
+      mediaRecorder.ondataavailable = e => { if(e.data.size>0) chunks.push(e.data); };
+      mediaRecorder.start();
+      isRecording = true;
+      recStatus.textContent = '녹음 중';
+      btnRecord.disabled = true; btnPause.disabled = false; btnReset.disabled = false; btnStop.disabled = false;
+      startTimer();
+      if (speechSupported) recognition.start();
+    }
+    function pauseRec(){
+      if (!mediaRecorder) return;
+      if (mediaRecorder.state === 'recording'){
+        mediaRecorder.pause(); stopTimer(); if (speechSupported) recognition.stop();
+        recStatus.textContent = '일시 정지'; btnPause.textContent = '재개';
+      } else if (mediaRecorder.state === 'paused'){
+        mediaRecorder.resume(); startTimer(); if (speechSupported) recognition.start();
+        recStatus.textContent = '녹음 중'; btnPause.textContent = '정지';
+      }
+    }
+    function stopRec(){
+      if (!mediaRecorder) return;
+      if (speechSupported) try { recognition.stop(); } catch(e){}
+      mediaRecorder.stop();
+      mediaRecorder.stream.getTracks().forEach(t=>t.stop());
+      isRecording = false; stopTimer();
+      recStatus.textContent = '완료';
+      btnRecord.disabled = false; btnPause.disabled = true; btnStop.disabled = true; btnSave.disabled = false; btnPause.textContent='정지';
+    }
+    function resetRec(){
+      if (mediaRecorder) { try{ mediaRecorder.stream.getTracks().forEach(t=>t.stop()); }catch(e){} }
+      if (speechSupported) try { recognition.stop(); } catch(e){}
+      isRecording = false; chunks = []; stopTimer();
+      timer.textContent = '00:00'; recStatus.textContent='대기 중';
+      btnRecord.disabled=false; btnPause.disabled=true; btnReset.disabled=false; btnSave.disabled=true; btnStop.disabled=true; btnPause.textContent='정지';
+    }
+    function saveBlob(){
+      const blob = new Blob(chunks, { type: 'audio/webm' });
+      const a = document.createElement('a');
+      const name = `${new Date().toISOString().slice(0,19).replace(/[:T]/g,'-')}_${studentName.value||'student'}.webm`;
+      a.href = URL.createObjectURL(blob); a.download = name; a.click(); URL.revokeObjectURL(a.href);
+    }
+
+    // 이벤트 바인딩
+    const $ = id => document.getElementById(id);
+    const studentName=$('studentName'), nickname=$('nickname'), gender=$('gender'),
+          major=$('major'), question=$('question'), transcript=$('transcript'),
+          feedback=$('feedback'), feedbackBox=$('feedbackBox'),
+          recStatus=$('recStatus'), timer=$('timer'),
+          btnRecord=$('btnRecord'), btnPause=$('btnPause'), btnReset=$('btnReset'),
+          btnStop=$('btnStop'), btnSave=$('btnSave'), btnCopy=$('btnCopy'), btnFeedback=$('btnFeedback');
+
+    btnRecord.onclick = startRec;
+    btnPause.onclick  = pauseRec;
+    btnStop.onclick   = stopRec;
+    btnReset.onclick  = resetRec;
+    btnSave.onclick   = saveBlob;
+
+    btnCopy.onclick = async () => {
+      const t = transcript.value.trim(); if(!t) return alert('복사할 답변이 없습니다.');
+      await navigator.clipboard.writeText(t); alert('복사됐습니다.');
+    };
+
+    btnFeedback.onclick = async () => {
+      const payload = {
+        studentName: studentName.value,
+        nickname: nickname.value,
+        gender: gender.value,
+        major: major.value,
+        question: question.value,
+        transcript: transcript.value
+      };
+      if (!payload.transcript) return alert('답변이 비어 있습니다.');
+
+      feedbackBox.classList.remove('hidden');
+      feedback.textContent = '피드백 생성 중…';
+
+      try {
+        const key = localStorage.getItem('mm_key') || '';
+        const res = await fetch(ENDPOINT, {
+          method:'POST',
+          headers: { 'Content-Type':'application/json', 'Authorization': 'Bearer ' + key },
+          body: JSON.stringify(payload)
+        });
+        if (!res.ok) throw new Error('권한 또는 서버 오류');
+        const data = await res.json();
+        feedback.textContent = (data.feedback || '피드백을 불러올 수 없습니다.').trim();
+      } catch (e) {
+        feedback.textContent = '오류: ' + e.message;
+      }
+    };
+  </script>
+</body>
+</html>
