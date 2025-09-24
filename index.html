@@ -35,8 +35,9 @@
       </div>
     </section>
 
-<!-- 학과/문항 -->
-<section class="grid md:grid-cols-2 gap-4 mb-4">
+
+   <!-- 지원 대학 + 학과 + 사전 질문 -->
+<section class="grid md:grid-cols-3 gap-4 mb-4">
   <div>
     <label class="block text-sm font-medium mb-1">지원 대학</label>
     <input id="university" class="w-full rounded-xl border border-slate-300 px-3 py-2" placeholder="예) OO대" />
@@ -45,26 +46,27 @@
     <label class="block text-sm font-medium mb-1">희망 학과</label>
     <input id="major" class="w-full rounded-xl border border-slate-300 px-3 py-2" placeholder="예) 인공지능학과" />
   </div>
+  <div>
+    <label class="block text-sm font-medium mb-1">면접 질문(사전 유형)</label>
+    <select id="questionPreset" class="w-full rounded-xl border border-slate-300 px-3 py-2">
+      <option value="가. 자기소개 및 지원동기">가. 자기소개 및 지원동기</option>
+      <option value="나. 학업역량(교과·탐구·독서)">나. 학업역량(교과·탐구·독서)</option>
+      <option value="다. 전공적합성 활동 사례">다. 전공적합성 활동 사례</option>
+      <option value="라. 인성(협업·리더십·성실성)">라. 인성(협업·리더십·성실성)</option>
+      <option value="마. 발전가능성(학습계획·진로계획)">마. 발전가능성(학습계획·진로계획)</option>
+    </select>
+    <p class="hint mt-1">* 아래 자유 입력칸에 쓰면 위 사전 유형 대신 <b>직접 입력한 질문</b>이 사용됩니다.</p>
+  </div>
+</section>
 
-<div>
-<label class="block text-sm font-medium mb-1">면접 질문 선택</label>
-<select id="question" class="w-full rounded-xl border border-slate-300 px-3 py-2">
-<option value="가. 자기소개 및 지원동기">가. 자기소개 및 지원동기</option>
-<option value="나. 학업역량(교과·탐구·독서)">나. 학업역량(교과·탐구·독서)</option>
-<option value="다. 전공적합성 활동 사례">다. 전공적합성 활동 사례</option>
-<option value="라. 인성(협업·리더십·성실성)">라. 인성(협업·리더십·성실성)</option>
-<option value="마. 발전가능성(학습계획·진로계획)">마. 발전가능성(학습계획·진로계획)</option>
-</select>
-</div>
+<!-- 자유 입력 질문 -->
+<section class="mb-4">
+  <label class="block text-sm font-medium mb-1">면접 질문(교사 직접 입력)</label>
+  <input id="questionCustom" class="w-full rounded-xl border border-slate-300 px-3 py-2" 
+    placeholder="예) 동아리 활동 중 가장 도전적이었던 경험과 배운 점을 말해보세요." />
 </section>
 
 
-
-    <!-- 자유 입력 질문 -->
-    <section class="mb-4">
-      <label class="block text-sm font-medium mb-1">면접 질문(교사 직접 입력)</label>
-      <input id="questionCustom" class="w-full rounded-xl border border-slate-300 px-3 py-2" placeholder="예) 동아리 활동 중 가장 도전적이었던 경험과 배운 점을 말해보세요." />
-    </section>
 
     <!-- 미리보기(영상) -->
     <section>
