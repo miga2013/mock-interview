@@ -35,24 +35,19 @@
       </div>
     </section>
 
+
     <!-- 학과/문항 -->
-    <section class="grid md:grid-cols-2 gap-4 mb-4">
-      <div>
-        <label class="block text-sm font-medium mb-1">희망 학과</label>
-        <input id="major" class="w-full rounded-xl border border-slate-300 px-3 py-2" placeholder="예) 인공지능학과" />
-      </div>
-      <div>
-        <label class="block text-sm font-medium mb-1">면접 질문(사전 유형)</label>
-        <select id="questionPreset" class="w-full rounded-xl border border-slate-300 px-3 py-2">
-          <option value="가. 자기소개 및 지원동기">가. 자기소개 및 지원동기</option>
-          <option value="나. 학업역량(교과·탐구·독서)">나. 학업역량(교과·탐구·독서)</option>
-          <option value="다. 전공적합성 활동 사례">다. 전공적합성 활동 사례</option>
-          <option value="라. 인성(협업·리더십·성실성)">라. 인성(협업·리더십·성실성)</option>
-          <option value="마. 발전가능성(학습계획·진로계획)">마. 발전가능성(학습계획·진로계획)</option>
-        </select>
-        <p class="hint mt-1">* 아래 자유 입력칸에 쓰면 위 사전 유형 대신 <b>직접 입력한 질문</b>이 사용됩니다.</p>
-      </div>
-    </section>
+<section class="grid md:grid-cols-2 gap-4 mb-4">
+  <div>
+    <label class="block text-sm font-medium mb-1">지원 대학</label>
+    <input id="university" class="w-full rounded-xl border border-slate-300 px-3 py-2" placeholder="예) OO대" />
+  </div>
+  <div>
+    <label class="block text-sm font-medium mb-1">희망 학과</label>
+    <input id="major" class="w-full rounded-xl border border-slate-300 px-3 py-2" placeholder="예) 인공지능학과" />
+  </div>
+</section>
+
 
     <!-- 자유 입력 질문 -->
     <section class="mb-4">
@@ -74,14 +69,14 @@
         <button id="btnStop"  class="rounded-2xl px-4 py-2 bg-slate-800 text-white" disabled>종료</button>
         <button id="btnSave" class="rounded-2xl px-4 py-2 bg-emerald-600 text-white shadow" disabled>저장(.webm)</button>
         <!-- 🔽 새로 추가된 초기화 버튼 -->
-        <button id="btnClearTranscript" class="rounded-2xl px-4 py-2 bg-orange-500 text-white shadow">대화 초기화</button>
+        <button id="btnClearTranscript" class="rounded-2xl px-4 py-2 bg-orange-500 text-white shadow">학생답변창 초기화</button>
         <span id="time" class="text-sm text-slate-500 ml-2">00:00</span>
       </div>
     </section>
 
-    <!-- 실시간 음성 인식 + 피드백 -->
+    <!-- 실시간 학생답변 + 피드백 -->
     <section class="mt-4">
-      <label class="block text-sm font-medium mb-1">실시간 음성인식 결과(수정 가능)</label>
+      <label class="block text-sm font-medium mb-1">실시간 학생답변(수정 가능)</label>
       <textarea id="transcript" class="w-full min-h-[140px] rounded-2xl border border-slate-300 p-3 outline-none" placeholder="말하면 자동 받아쓰기 됩니다. 미작동 시 직접 입력하세요."></textarea>
 
       <div class="flex flex-col md:flex-row gap-2 mt-2">
@@ -89,8 +84,8 @@
         <button id="btnFeedbackBeta" class="rounded-xl px-3 py-2 bg-violet-700 text-white md:flex-1">AI 피드백 베타</button>
       </div>
       <p class="hint mt-1">
-        알파: gpt-4o-mini로 <b>자동</b> 피드백을 바로 생성. /
-        베타: <b>ChatGPTs 링크</b>를 새 창으로 열고, 학생 답변+문맥을 <b>클립보드에 자동 복사</b>합니다(열린 창에 붙여넣기).
+        알파 : gpt-4o-mini로 <b>피드백</b>을 바로 생성 /
+        베타 : <b>GPTs 링크</b>를 새 창으로 열고, 열린 창에 자동 복사된 학생답변을 <b>Ctrl+V</b>로 붙여넣기
       </p>
 
       <div id="feedbackBox" class="mt-3 hidden">
@@ -123,7 +118,9 @@ const feedbackBox = $('feedbackBox');
 const btnRecord = $('btnRecord'), btnPause=$('btnPause'), btnStop=$('btnStop'), btnSave=$('btnSave');
 const btnFeedbackAlpha = $('btnFeedbackAlpha');
 const btnFeedbackBeta = $('btnFeedbackBeta');
-const studentName=$('studentName'), nickname=$('nickname'), gender=$('gender'), major=$('major');
+const studentName=$('studentName'), nickname=$('nickname'), gender=$('gender');
+const university=$('university');   
+const major=$('major');
 const questionPreset=$('questionPreset'), questionCustom=$('questionCustom');
 const btnClearTranscript = $('btnClearTranscript'); // 🔽 새 버튼 요소
 
@@ -263,7 +260,7 @@ btnFeedbackBeta.onclick = async () => {
   if (!tr) return alert('학생 답변이 비어 있습니다.');
 
   const prompt = [
-    '역할: 대한민국 고3 학생의 대학 모의면접 평가관.',
+    '역할: 우리반 학생의 대학 모의면접 평가관.',
     '목표: 강점 3~5개, 개선점 3~5개, 예상추가문항 3문항, 1분 모범 답변 예시.',
     `전공: ${majorVal}`,
     `질문: ${q}`,
