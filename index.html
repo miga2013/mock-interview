@@ -190,6 +190,9 @@ function stopRec(){
   if (!mediaRecorder) return;
   try{ mediaRecorder.stop(); }catch(e){}
   if (stream) stream.getTracks().forEach(t=>t.stop());
+if (speechSupported && recognition) {
+    try { recognition.stop(); } catch(e){}
+  }
   isRecording=false; stopTimer();
   btnRecord.disabled=false; btnPause.disabled=true; btnStop.disabled=true; btnPause.textContent='일시정지';
   btnSave.disabled = false;
