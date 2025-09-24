@@ -3,24 +3,19 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>모의 면접 프로그램 (고3)</title>
+  <title>이충 모의 면접 프로그램 (영상+음성, 알파/베타 + 사용자 질문)</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    .blink { animation: bl 1s steps(2, start) infinite; }
-    @keyframes bl { to { visibility: hidden; } }
-  </style>
+  <style>.hint{font-size:12px;color:#64748b}</style>
 </head>
 <body class="bg-slate-50 text-slate-900">
   <div class="max-w-5xl mx-auto p-6">
-    <header class="mb-6">
-      <h1 class="text-2xl font-bold">모의 면접 프로그램</h1>
-      <p class="text-sm text-slate-600">
-        답변 종료 → <span class="font-semibold">“답변 복사”</span> → <span class="font-semibold">“AI 피드백 받기”</span> 순서로 진행하세요.
-      </p>
+    <header class="mb-4">
+      <h1 class="text-2xl font-bold">이충 모의 면접 프로그램</h1>
+      <p class="text-sm text-slate-600">영상·음성 녹화 + 실시간 받아쓰기. 피드백은 <b>알파</b> 또는 <b>베타</b> 선택.</p>
     </header>
 
     <!-- 기본정보 -->
-    <section class="grid md:grid-cols-3 gap-4 mb-6">
+    <section class="grid md:grid-cols-3 gap-4 mb-4">
       <div>
         <label class="block text-sm font-medium mb-1">학교/반/이름</label>
         <input id="studentName" class="w-full rounded-xl border border-slate-300 px-3 py-2" placeholder="예) 3-2 홍길동" />
@@ -41,197 +36,248 @@
     </section>
 
     <!-- 학과/문항 -->
-    <section class="grid md:grid-cols-2 gap-4 mb-6">
+    <section class="grid md:grid-cols-2 gap-4 mb-4">
       <div>
         <label class="block text-sm font-medium mb-1">희망 학과</label>
         <input id="major" class="w-full rounded-xl border border-slate-300 px-3 py-2" placeholder="예) 인공지능학과" />
       </div>
       <div>
-        <label class="block text-sm font-medium mb-1">면접 질문</label>
-        <select id="question" class="w-full rounded-xl border border-slate-300 px-3 py-2">
+        <label class="block text-sm font-medium mb-1">면접 질문(사전 유형)</label>
+        <select id="questionPreset" class="w-full rounded-xl border border-slate-300 px-3 py-2">
           <option value="가. 자기소개 및 지원동기">가. 자기소개 및 지원동기</option>
           <option value="나. 학업역량(교과·탐구·독서)">나. 학업역량(교과·탐구·독서)</option>
           <option value="다. 전공적합성 활동 사례">다. 전공적합성 활동 사례</option>
           <option value="라. 인성(협업·리더십·성실성)">라. 인성(협업·리더십·성실성)</option>
           <option value="마. 발전가능성(학습계획·진로계획)">마. 발전가능성(학습계획·진로계획)</option>
         </select>
+        <p class="hint mt-1">* 아래 자유 입력칸에 쓰면 위 사전 유형 대신 <b>직접 입력한 질문</b>이 사용됩니다.</p>
       </div>
     </section>
 
-    <!-- 녹음/인식 -->
+    <!-- 자유 입력 질문 -->
     <section class="mb-4">
-      <div class="aspect-video bg-black/90 rounded-2xl flex items-center justify-center text-slate-200">
-        <div class="text-center">
-          <p id="recStatus" class="text-lg">대기 중</p>
-          <p id="timer" class="text-3xl font-semibold mt-1">00:00</p>
-        </div>
-      </div>
+      <label class="block text-sm font-medium mb-1">면접 질문(교사 직접 입력)</label>
+      <input id="questionCustom" class="w-full rounded-xl border border-slate-300 px-3 py-2" placeholder="예) 동아리 활동 중 가장 도전적이었던 경험과 배운 점을 말해보세요." />
+    </section>
 
-      <div class="flex items-center flex-wrap gap-2 mt-4">
-        <button id="btnRecord" class="rounded-2xl px-4 py-2 bg-rose-600 text-white shadow">녹화</button>
-        <button id="btnPause" class="rounded-2xl px-4 py-2 bg-slate-200 text-slate-800" disabled>정지</button>
-        <button id="btnReset" class="rounded-2xl px-4 py-2 bg-slate-200 text-slate-800" disabled>재녹</button>
+    <!-- 미리보기(영상) -->
+    <section>
+      <div class="rounded-2xl overflow-hidden bg-black relative">
+        <video id="preview" class="w-full h-[360px] bg-black" autoplay playsinline muted></video>
+        <div class="absolute top-2 left-2 text-xs bg-black/60 text-white px-2 py-1 rounded">미리보기(카메라)</div>
+      </div>
+      <p class="hint mt-1">* 첫 사용 시 카메라/마이크 권한을 허용해야 합니다. (크롬 권장)</p>
+
+      <div class="flex items-center flex-wrap gap-2 mt-3">
+        <button id="btnRecord" class="rounded-2xl px-4 py-2 bg-rose-600 text-white shadow">녹화 시작</button>
+        <button id="btnPause" class="rounded-2xl px-4 py-2 bg-slate-200 text-slate-800" disabled>일시정지</button>
         <button id="btnStop"  class="rounded-2xl px-4 py-2 bg-slate-800 text-white" disabled>종료</button>
         <button id="btnSave" class="rounded-2xl px-4 py-2 bg-emerald-600 text-white shadow" disabled>저장(.webm)</button>
-        <span class="text-sm text-slate-500">* 브라우저에서 임시 저장</span>
+        <span id="time" class="text-sm text-slate-500 ml-2">00:00</span>
       </div>
+    </section>
 
-      <div class="mt-4">
-        <label class="block text-sm font-medium mb-1">실시간 음성인식 결과(수정 가능)</label>
-        <textarea id="transcript" class="w-full min-h-[140px] rounded-2xl border border-slate-300 p-3 outline-none" placeholder="말하면 자동 받아쓰기 됩니다. 미작동 시 직접 입력하세요."></textarea>
-        <div class="flex gap-2 mt-2">
-          <button id="btnCopy" class="rounded-xl px-3 py-2 bg-slate-800 text-white">답변 복사</button>
-          <button id="btnFeedback" class="rounded-xl px-3 py-2 bg-indigo-600 text-white">AI 피드백 받기</button>
-        </div>
+    <!-- 실시간 음성 인식 + 피드백 -->
+    <section class="mt-4">
+      <label class="block text-sm font-medium mb-1">실시간 음성인식 결과(수정 가능)</label>
+      <textarea id="transcript" class="w-full min-h-[140px] rounded-2xl border border-slate-300 p-3 outline-none" placeholder="말하면 자동 받아쓰기 됩니다. 미작동 시 직접 입력하세요."></textarea>
+
+      <div class="flex flex-col md:flex-row gap-2 mt-2">
+        <button id="btnFeedbackAlpha" class="rounded-xl px-3 py-2 bg-indigo-600 text-white md:flex-1">AI 피드백 알파</button>
+        <button id="btnFeedbackBeta" class="rounded-xl px-3 py-2 bg-violet-700 text-white md:flex-1">AI 피드백 베타</button>
       </div>
+      <p class="hint mt-1">
+        알파: gpt-4o-mini로 <b>자동</b> 피드백을 바로 생성. /
+        베타: <b>ChatGPTs 링크</b>를 새 창으로 열고, 학생 답변+문맥을 <b>클립보드에 자동 복사</b>합니다(열린 창에 붙여넣기).
+      </p>
 
-      <div id="feedbackBox" class="mt-4 hidden">
+      <div id="feedbackBox" class="mt-3 hidden">
         <label class="block text-sm font-medium mb-1">AI 피드백</label>
         <div id="feedback" class="rounded-2xl border border-slate-300 p-4 bg-white text-sm whitespace-pre-wrap"></div>
       </div>
     </section>
   </div>
 
-  <script>
-    /********* 설정(여기만 바꾸세요) *********/
-    const ENDPOINT = 'https://mock-interview.junseohan2013.workers.dev/feedback'; // Cloudflare Worker URL
-    /*****************************************/
+<script>
+/********* 설정(여기만 바꾸세요) *********/
+const ENDPOINT = 'https://mock-interview.junseohan2013.workers.dev/feedback'; // 알파용 Cloudflare Worker URL
+const GPTS_URL = 'https://chatgpt.com/g/g-nUjgVjYQI-daeibmyeonjeob-saenggibugiban-myeonjeob-yesangjilmun-curon-jesimun-myeonjeob?model=gpt-5'; // 베타용 ChatGPTs 링크(대표님 링크로 교체)
+/*****************************************/
 
-    // ?k=토큰 → localStorage 저장
-    (function saveTokenFromURL(){
-      const u = new URL(location.href);
-      const k = u.searchParams.get('k');
-      if (k) localStorage.setItem('mm_key', k);
-    })();
+// 토큰 저장 (?k=)
+(function saveTokenFromURL(){
+  const u = new URL(location.href);
+  const k = u.searchParams.get('k');
+  if (k) localStorage.setItem('mm_key', k);
+})();
 
-    // 상태
-    let mediaRecorder, chunks = [], isRecording = false, timerId;
-    let recognition, speechSupported = false, startedAt = 0;
+// 요소
+const $ = id => document.getElementById(id);
+const preview = $('preview');
+const timeEl = $('time');
+const transcript = $('transcript');
+const feedback = $('feedback');
+const feedbackBox = $('feedbackBox');
+const btnRecord = $('btnRecord'), btnPause=$('btnPause'), btnStop=$('btnStop'), btnSave=$('btnSave');
+const btnFeedbackAlpha = $('btnFeedbackAlpha');
+const btnFeedbackBeta = $('btnFeedbackBeta');
+const studentName=$('studentName'), nickname=$('nickname'), gender=$('gender'), major=$('major');
+const questionPreset=$('questionPreset'), questionCustom=$('questionCustom');
 
-    // 타이머
-    function fmt(sec){ const m=String(Math.floor(sec/60)).padStart(2,'0'); const s=String(sec%60).padStart(2,'0'); return `${m}:${s}`; }
-    function startTimer(){ startedAt = Date.now(); timerId = setInterval(()=> {
-      const sec = Math.floor((Date.now()-startedAt)/1000);
-      document.getElementById('timer').textContent = fmt(sec);
-    }, 300);}
-    function stopTimer(){ clearInterval(timerId); }
+// 상태
+let stream, mediaRecorder, chunks=[], isRecording=false, timerId, startMs=0;
+let recognition, speechSupported=false;
 
-    // 음성인식
-    (function initSR(){
-      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-      if (!SR) return;
-      recognition = new SR();
-      recognition.lang = 'ko-KR';
-      recognition.continuous = true;
-      recognition.interimResults = true;
-      let finalText = '';
-      recognition.onresult = e => {
-        let interim = '';
-        for (let i=e.resultIndex; i<e.results.length; i++){
-          const tr = e.results[i][0].transcript;
-          if (e.results[i].isFinal) finalText += tr + ' ';
-          else interim += tr;
-        }
-        transcript.value = (finalText + interim).trim();
-      };
-      recognition.onend = ()=>{ if(isRecording) recognition.start(); };
-      speechSupported = true;
-    })();
+// 타이머
+function fmt(sec){ const m=String(Math.floor(sec/60)).padStart(2,'0'); const s=String(sec%60).padStart(2,'0'); return `${m}:${s}`; }
+function startTimer(){ startMs=Date.now(); timerId=setInterval(()=>{ const sec=Math.floor((Date.now()-startMs)/1000); timeEl.textContent=fmt(sec); },300); }
+function stopTimer(){ clearInterval(timerId); }
 
-    // 녹음
-    async function startRec(){
-      const stream = await navigator.mediaDevices.getUserMedia({ audio:true });
-      mediaRecorder = new MediaRecorder(stream);
-      chunks = [];
-      mediaRecorder.ondataavailable = e => { if(e.data.size>0) chunks.push(e.data); };
-      mediaRecorder.start();
-      isRecording = true;
-      recStatus.textContent = '녹음 중';
-      btnRecord.disabled = true; btnPause.disabled = false; btnReset.disabled = false; btnStop.disabled = false;
-      startTimer();
-      if (speechSupported) recognition.start();
+// 음성 인식
+(function initSR(){
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) return;
+  recognition = new SR();
+  recognition.lang = 'ko-KR';
+  recognition.continuous = true;
+  recognition.interimResults = true;
+  let finalText='';
+  recognition.onresult = e => {
+    let interim='';
+    for (let i=e.resultIndex; i<e.results.length; i++){
+      const tr=e.results[i][0].transcript;
+      if (e.results[i].isFinal) finalText += tr + ' ';
+      else interim += tr;
     }
-    function pauseRec(){
-      if (!mediaRecorder) return;
-      if (mediaRecorder.state === 'recording'){
-        mediaRecorder.pause(); stopTimer(); if (speechSupported) recognition.stop();
-        recStatus.textContent = '일시 정지'; btnPause.textContent = '재개';
-      } else if (mediaRecorder.state === 'paused'){
-        mediaRecorder.resume(); startTimer(); if (speechSupported) recognition.start();
-        recStatus.textContent = '녹음 중'; btnPause.textContent = '정지';
-      }
+    transcript.value = (finalText + interim).trim();
+  };
+  recognition.onend = ()=>{ if(isRecording) recognition.start(); };
+  speechSupported = true;
+})();
+
+async function startRec(){
+  // 오디오+비디오
+  stream = await navigator.mediaDevices.getUserMedia({ audio:true, video:true });
+  preview.srcObject = stream;
+
+  // 비디오+오디오 녹화
+  const mime = MediaRecorder.isTypeSupported('video/webm;codecs=vp9,opus') ?
+               'video/webm;codecs=vp9,opus' : 'video/webm;codecs=vp8,opus';
+  mediaRecorder = new MediaRecorder(stream, { mimeType: mime });
+  chunks = [];
+  mediaRecorder.ondataavailable = e => { if (e.data && e.data.size>0) chunks.push(e.data); };
+  mediaRecorder.onstop = () => { btnSave.disabled = chunks.length===0; };
+
+  mediaRecorder.start();
+  isRecording = true;
+  btnRecord.disabled = true; btnPause.disabled=false; btnStop.disabled=false;
+  startTimer();
+  if (speechSupported) try{ recognition.start(); }catch(e){}
+}
+
+function pauseRec(){
+  if (!mediaRecorder) return;
+  if (mediaRecorder.state==='recording'){
+    mediaRecorder.pause(); stopTimer(); if (speechSupported) try{ recognition.stop(); }catch(e){}
+    btnPause.textContent='재개';
+  } else if (mediaRecorder.state==='paused'){
+    mediaRecorder.resume(); startTimer(); if (speechSupported) try{ recognition.start(); }catch(e){}
+    btnPause.textContent='일시정지';
+  }
+}
+
+function stopRec(){
+  if (!mediaRecorder) return;
+  try{ mediaRecorder.stop(); }catch(e){}
+  if (stream) stream.getTracks().forEach(t=>t.stop());
+  isRecording=false; stopTimer();
+  btnRecord.disabled=false; btnPause.disabled=true; btnStop.disabled=true; btnPause.textContent='일시정지';
+  btnSave.disabled = false;
+}
+
+function saveBlob(){
+  if (!chunks.length) return alert('저장할 녹화가 없습니다.');
+  const blob = new Blob(chunks, { type: 'video/webm' });
+  const a = document.createElement('a');
+  const name = `${new Date().toISOString().slice(0,19).replace(/[:T]/g,'-')}_${studentName.value||'student'}.webm`;
+  a.href = URL.createObjectURL(blob); a.download = name; a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
+}
+
+// 공통: 실제로 사용할 질문 문자열(커스텀 우선)
+function currentQuestion(){
+  const custom = questionCustom.value.trim();
+  return custom ? custom : (questionPreset.value || '미지정');
+}
+
+// 알파: gpt-4o-mini (Worker)
+btnFeedbackAlpha.onclick = async () => {
+  const payload = {
+    studentName: studentName.value,
+    nickname: nickname.value,
+    gender: gender.value,
+    major: major.value,
+    question: currentQuestion(),
+    transcript: transcript.value
+  };
+  if (!payload.transcript) return alert('답변이 비어 있습니다.');
+
+  feedbackBox.classList.remove('hidden');
+  feedback.textContent = '피드백 생성 중…';
+
+  try {
+    const key = localStorage.getItem('mm_key') || '';
+    const res = await fetch(ENDPOINT, {
+      method:'POST',
+      headers: { 'Content-Type':'application/json', 'Authorization': 'Bearer ' + key },
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) {
+      const msg = await res.text().catch(()=>'');
+      throw new Error(`서버 응답 오류 (${res.status}): ${msg}`);
     }
-    function stopRec(){
-      if (!mediaRecorder) return;
-      if (speechSupported) try { recognition.stop(); } catch(e){}
-      mediaRecorder.stop();
-      mediaRecorder.stream.getTracks().forEach(t=>t.stop());
-      isRecording = false; stopTimer();
-      recStatus.textContent = '완료';
-      btnRecord.disabled = false; btnPause.disabled = true; btnStop.disabled = true; btnSave.disabled = false; btnPause.textContent='정지';
-    }
-    function resetRec(){
-      if (mediaRecorder) { try{ mediaRecorder.stream.getTracks().forEach(t=>t.stop()); }catch(e){} }
-      if (speechSupported) try { recognition.stop(); } catch(e){}
-      isRecording = false; chunks = []; stopTimer();
-      timer.textContent = '00:00'; recStatus.textContent='대기 중';
-      btnRecord.disabled=false; btnPause.disabled=true; btnReset.disabled=false; btnSave.disabled=true; btnStop.disabled=true; btnPause.textContent='정지';
-    }
-    function saveBlob(){
-      const blob = new Blob(chunks, { type: 'audio/webm' });
-      const a = document.createElement('a');
-      const name = `${new Date().toISOString().slice(0,19).replace(/[:T]/g,'-')}_${studentName.value||'student'}.webm`;
-      a.href = URL.createObjectURL(blob); a.download = name; a.click(); URL.revokeObjectURL(a.href);
-    }
+    const data = await res.json();
+    feedback.textContent = (data.feedback || '피드백을 불러올 수 없습니다.').trim();
+  } catch (e) {
+    feedback.textContent = '오류: ' + e.message;
+  }
+};
 
-    // 이벤트 바인딩
-    const $ = id => document.getElementById(id);
-    const studentName=$('studentName'), nickname=$('nickname'), gender=$('gender'),
-          major=$('major'), question=$('question'), transcript=$('transcript'),
-          feedback=$('feedback'), feedbackBox=$('feedbackBox'),
-          recStatus=$('recStatus'), timer=$('timer'),
-          btnRecord=$('btnRecord'), btnPause=$('btnPause'), btnReset=$('btnReset'),
-          btnStop=$('btnStop'), btnSave=$('btnSave'), btnCopy=$('btnCopy'), btnFeedback=$('btnFeedback');
+// 베타: ChatGPTs 새 창 열기 + 클립보드 자동 복사 (요약요청 제거)
+btnFeedbackBeta.onclick = async () => {
+  const majorVal = major.value || '미지정';
+  const q = currentQuestion();
+  const tr = transcript.value.trim();
+  const sn = studentName.value || '';
+  const nn = nickname.value || '';
+  const gd = gender.value || '';
 
-    btnRecord.onclick = startRec;
-    btnPause.onclick  = pauseRec;
-    btnStop.onclick   = stopRec;
-    btnReset.onclick  = resetRec;
-    btnSave.onclick   = saveBlob;
+  if (!tr) return alert('학생 답변이 비어 있습니다.');
 
-    btnCopy.onclick = async () => {
-      const t = transcript.value.trim(); if(!t) return alert('복사할 답변이 없습니다.');
-      await navigator.clipboard.writeText(t); alert('복사됐습니다.');
-    };
+  const prompt = [
+    '역할: 대한민국 고3 학생의 대학 모의면접 평가관.',
+    '목표: 강점 3~5개, 개선점 3~5개, 예상추가문항 3문항, 1분 모범 답변 예시.',
+    `전공: ${majorVal}`,
+    `질문: ${q}`,
+    `학생(선택): ${sn}${nn ? ' ('+nn+')' : ''} ${gd}`,
+    '학생 답변:',
+    tr
+  ].join('\n\n');
 
-    btnFeedback.onclick = async () => {
-      const payload = {
-        studentName: studentName.value,
-        nickname: nickname.value,
-        gender: gender.value,
-        major: major.value,
-        question: question.value,
-        transcript: transcript.value
-      };
-      if (!payload.transcript) return alert('답변이 비어 있습니다.');
+  try {
+    await navigator.clipboard.writeText(prompt);
+    alert('학생 답변과 지시문을 클립보드에 복사했습니다. 열리는 ChatGPT 창에 붙여넣으세요!');
+  } catch (e) {
+    alert('클립보드 복사에 실패했습니다. 페이지 권한을 확인하세요.');
+  }
+  window.open(GPTS_URL, '_blank', 'noopener,noreferrer');
+};
 
-      feedbackBox.classList.remove('hidden');
-      feedback.textContent = '피드백 생성 중…';
-
-      try {
-        const key = localStorage.getItem('mm_key') || '';
-        const res = await fetch(ENDPOINT, {
-          method:'POST',
-          headers: { 'Content-Type':'application/json', 'Authorization': 'Bearer ' + key },
-          body: JSON.stringify(payload)
-        });
-        if (!res.ok) throw new Error('권한 또는 서버 오류');
-        const data = await res.json();
-        feedback.textContent = (data.feedback || '피드백을 불러올 수 없습니다.').trim();
-      } catch (e) {
-        feedback.textContent = '오류: ' + e.message;
-      }
-    };
-  </script>
+// 버튼 연결
+btnRecord.onclick = startRec;
+btnPause.onclick  = pauseRec;
+btnStop.onclick   = stopRec;
+btnSave.onclick   = saveBlob;
+</script>
 </body>
 </html>
