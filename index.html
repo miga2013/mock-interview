@@ -73,6 +73,8 @@
         <button id="btnPause" class="rounded-2xl px-4 py-2 bg-slate-200 text-slate-800" disabled>일시정지</button>
         <button id="btnStop"  class="rounded-2xl px-4 py-2 bg-slate-800 text-white" disabled>종료</button>
         <button id="btnSave" class="rounded-2xl px-4 py-2 bg-emerald-600 text-white shadow" disabled>저장(.webm)</button>
+        <!-- 🔽 새로 추가된 초기화 버튼 -->
+        <button id="btnClearTranscript" class="rounded-2xl px-4 py-2 bg-orange-500 text-white shadow">대화 초기화</button>
         <span id="time" class="text-sm text-slate-500 ml-2">00:00</span>
       </div>
     </section>
@@ -101,7 +103,7 @@
 <script>
 /********* 설정(여기만 바꾸세요) *********/
 const ENDPOINT = 'https://mock-interview.junseohan2013.workers.dev/feedback'; // 알파용 Cloudflare Worker URL
-const GPTS_URL = 'https://chatgpt.com/g/g-nUjgVjYQI-daeibmyeonjeob-saenggibugiban-myeonjeob-yesangjilmun-curon-jesimun-myeonjeob?model=gpt-5'; // 베타용 ChatGPTs 링크(대표님 링크로 교체)
+const GPTS_URL = 'https://chatgpt.com/g/g-nUjgVjYQI-daeibmyeonjeob-saenggibugiban-myeonjeob-yesangjilmun-curon-jesimun-myeonjeob?model=gpt-5'; // 베타용 ChatGPTs 링크
 /*****************************************/
 
 // 토큰 저장 (?k=)
@@ -123,6 +125,7 @@ const btnFeedbackAlpha = $('btnFeedbackAlpha');
 const btnFeedbackBeta = $('btnFeedbackBeta');
 const studentName=$('studentName'), nickname=$('nickname'), gender=$('gender'), major=$('major');
 const questionPreset=$('questionPreset'), questionCustom=$('questionCustom');
+const btnClearTranscript = $('btnClearTranscript'); // 🔽 새 버튼 요소
 
 // 상태
 let stream, mediaRecorder, chunks=[], isRecording=false, timerId, startMs=0;
@@ -151,16 +154,18 @@ function stopTimer(){ clearInterval(timerId); }
     }
     transcript.value = (finalText + interim).trim();
   };
-  recognition.onend = ()=>{ if(isRecording) recognition.start(); };
+  recognition.onend = ()=>{ 
+    if (isRecording) {
+      try { recognition.start(); } catch(e){}
+    }
+  };
   speechSupported = true;
 })();
 
 async function startRec(){
-  // 오디오+비디오
   stream = await navigator.mediaDevices.getUserMedia({ audio:true, video:true });
   preview.srcObject = stream;
 
-  // 비디오+오디오 녹화
   const mime = MediaRecorder.isTypeSupported('video/webm;codecs=vp9,opus') ?
                'video/webm;codecs=vp9,opus' : 'video/webm;codecs=vp8,opus';
   mediaRecorder = new MediaRecorder(stream, { mimeType: mime });
@@ -190,7 +195,7 @@ function stopRec(){
   if (!mediaRecorder) return;
   try{ mediaRecorder.stop(); }catch(e){}
   if (stream) stream.getTracks().forEach(t=>t.stop());
-if (speechSupported && recognition) {
+  if (speechSupported && recognition) {
     try { recognition.stop(); } catch(e){}
   }
   isRecording=false; stopTimer();
@@ -207,7 +212,7 @@ function saveBlob(){
   setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
 }
 
-// 공통: 실제로 사용할 질문 문자열(커스텀 우선)
+// 공통: 실제로 사용할 질문 문자열
 function currentQuestion(){
   const custom = questionCustom.value.trim();
   return custom ? custom : (questionPreset.value || '미지정');
@@ -246,7 +251,7 @@ btnFeedbackAlpha.onclick = async () => {
   }
 };
 
-// 베타: ChatGPTs 새 창 열기 + 클립보드 자동 복사 (요약요청 제거)
+// 베타: ChatGPTs 새 창 열기 + 클립보드 자동 복사
 btnFeedbackBeta.onclick = async () => {
   const majorVal = major.value || '미지정';
   const q = currentQuestion();
@@ -281,6 +286,13 @@ btnRecord.onclick = startRec;
 btnPause.onclick  = pauseRec;
 btnStop.onclick   = stopRec;
 btnSave.onclick   = saveBlob;
+
+// 🔽 초기화 버튼 이벤트
+btnClearTranscript.onclick = () => {
+  if (confirm('실시간 받아쓰기 내용을 모두 삭제하시겠습니까?')) {
+    transcript.value = '';
+  }
+};
 </script>
 </body>
 </html>
