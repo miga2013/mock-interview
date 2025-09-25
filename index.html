@@ -55,7 +55,7 @@
       <option value="라. 인성(협업·리더십·성실성)">라. 인성(협업·리더십·성실성)</option>
       <option value="마. 발전가능성(학습계획·진로계획)">마. 발전가능성(학습계획·진로계획)</option>
     </select>
-  </div>
+     </div>
 </section>
 
 <!-- 자유 입력 질문 -->
@@ -139,6 +139,7 @@ const btnClearTranscript = $('btnClearTranscript'); // 🔽 새 버튼 요소
 // 상태
 let stream, mediaRecorder, chunks=[], isRecording=false, timerId, startMs=0;
 let recognition, speechSupported=false;
+let finalText = "";
 
 // 타이머
 function fmt(sec){ const m=String(Math.floor(sec/60)).padStart(2,'0'); const s=String(sec%60).padStart(2,'0'); return `${m}:${s}`; }
@@ -153,7 +154,6 @@ function stopTimer(){ clearInterval(timerId); }
   recognition.lang = 'ko-KR';
   recognition.continuous = true;
   recognition.interimResults = true;
-  let finalText='';
   recognition.onresult = e => {
     let interim='';
     for (let i=e.resultIndex; i<e.results.length; i++){
@@ -172,6 +172,8 @@ function stopTimer(){ clearInterval(timerId); }
 })();
 
 async function startRec(){
+  finalText = "";
+  transcript.value = "";
   stream = await navigator.mediaDevices.getUserMedia({ audio:true, video:true });
   preview.srcObject = stream;
 
@@ -299,6 +301,7 @@ btnSave.onclick   = saveBlob;
 // 🔽 초기화 버튼 이벤트
 btnClearTranscript.onclick = () => {
   if (confirm('실시간 받아쓰기 내용을 모두 삭제하시겠습니까?')) {
+    finalText = "";
     transcript.value = '';
   }
 };
