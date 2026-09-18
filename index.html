@@ -3,15 +3,15 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>이충 모의 면접 프로그램 (영상+음성, 알파/베타 + 사용자 질문)</title>
+  <title>모의 면접 프로그램</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <style>.hint{font-size:12px;color:#64748b}</style>
+  <style>
+    .hint{font-size:12px;color:#64748b}
+    .status{font-size:12px;color:#475569}
+  </style>
 </head>
 <body class="bg-slate-50 text-slate-900">
-  <div class="max-w-5xl mx-auto p-6">
-    <header class="mb-4">
-      <h1 class="text-2xl font-bold">이충 모의 면접 프로그램</h1>
-      <p class="text-sm text-slate-600">영상·음성 녹화 + 실시간 받아쓰기. 피드백은 <b>알파</b> 또는 <b>베타</b> 선택.</p>
+  <div class="max-w-5xl mx-auto p-6">알파 : <strong>피드백</strong>을 바로 생성 / 베타 : <strong>GPTs 링크</strong>를 새 창으로 열고, 열린 창에 자동 복사된 학생답변을 <strong>Ctrl+V</strong>로 붙여넣기</p>
     </header>
 
     <!-- 기본정보 -->
@@ -35,37 +35,34 @@
       </div>
     </section>
 
+    <!-- 지원 대학 + 학과 + 사전 질문 -->
+    <section class="grid md:grid-cols-3 gap-4 mb-4">
+      <div>
+        <label class="block text-sm font-medium mb-1">지원 대학</label>
+        <input id="university" class="w-full rounded-xl border border-slate-300 px-3 py-2" placeholder="예) OO대" />
+      </div>
+      <div>
+        <label class="block text-sm font-medium mb-1">희망 학과</label>
+        <input id="major" class="w-full rounded-xl border border-slate-300 px-3 py-2" placeholder="예) 인공지능학과" />
+      </div>
+      <div>
+        <label class="block text-sm font-medium mb-1">면접 질문(사전 유형)</label>
+        <select id="questionPreset" class="w-full rounded-xl border border-slate-300 px-3 py-2">
+          <option value="가. 자기소개 및 지원동기">가. 자기소개 및 지원동기</option>
+          <option value="나. 학업역량(교과·탐구·독서)">나. 학업역량(교과·탐구·독서)</option>
+          <option value="다. 전공적합성 활동 사례">다. 전공적합성 활동 사례</option>
+          <option value="라. 인성(협업·리더십·성실성)">라. 인성(협업·리더십·성실성)</option>
+          <option value="마. 발전가능성(학습계획·진로계획)">마. 발전가능성(학습계획·진로계획)</option>
+        </select>
+      </div>
+    </section>
 
-   <!-- 지원 대학 + 학과 + 사전 질문 -->
-<section class="grid md:grid-cols-3 gap-4 mb-4">
-  <div>
-    <label class="block text-sm font-medium mb-1">지원 대학</label>
-    <input id="university" class="w-full rounded-xl border border-slate-300 px-3 py-2" placeholder="예) OO대" />
-  </div>
-  <div>
-    <label class="block text-sm font-medium mb-1">희망 학과</label>
-    <input id="major" class="w-full rounded-xl border border-slate-300 px-3 py-2" placeholder="예) 인공지능학과" />
-  </div>
-  <div>
-    <label class="block text-sm font-medium mb-1">면접 질문(사전 유형)</label>
-    <select id="questionPreset" class="w-full rounded-xl border border-slate-300 px-3 py-2">
-      <option value="가. 자기소개 및 지원동기">가. 자기소개 및 지원동기</option>
-      <option value="나. 학업역량(교과·탐구·독서)">나. 학업역량(교과·탐구·독서)</option>
-      <option value="다. 전공적합성 활동 사례">다. 전공적합성 활동 사례</option>
-      <option value="라. 인성(협업·리더십·성실성)">라. 인성(협업·리더십·성실성)</option>
-      <option value="마. 발전가능성(학습계획·진로계획)">마. 발전가능성(학습계획·진로계획)</option>
-    </select>
-     </div>
-</section>
-
-<!-- 자유 입력 질문 -->
-<section class="mb-4">
-  <label class="block text-sm font-medium mb-1">면접 질문(교사 직접 입력)</label>
-  <input id="questionCustom" class="w-full rounded-xl border border-slate-300 px-3 py-2" 
-    placeholder="예) 동아리 활동 중 가장 도전적이었던 경험과 배운 점을 말해보세요." />
-</section>
-
-
+    <!-- 자유 입력 질문 -->
+    <section class="mb-4">
+      <label class="block text-sm font-medium mb-1">면접 질문(교사 직접 입력)</label>
+      <input id="questionCustom" class="w-full rounded-xl border border-slate-300 px-3 py-2"
+        placeholder="예) 동아리 활동 중 가장 도전적이었던 경험과 배운 점을 말해보세요." />
+    </section>
 
     <!-- 미리보기(영상) -->
     <section>
@@ -73,17 +70,24 @@
         <video id="preview" class="w-full h-[360px] bg-black" autoplay playsinline muted></video>
         <div class="absolute top-2 left-2 text-xs bg-black/60 text-white px-2 py-1 rounded">미리보기(카메라)</div>
       </div>
-      <p class="hint mt-1">* 첫 사용 시 카메라/마이크 권한을 허용해야 합니다. (크롬 권장)</p>
+
+      <p class="hint mt-1">
+        * 첫 사용 시 카메라/마이크 권한을 허용해야 합니다. PC는 Chrome/Edge, iPad는 Safari 사용을 권장합니다.
+      </p>
+      <p id="recordStatus" class="status mt-1">녹화 준비됨</p>
 
       <div class="flex items-center flex-wrap gap-2 mt-3">
         <button id="btnRecord" class="rounded-2xl px-4 py-2 bg-rose-600 text-white shadow">녹화 시작</button>
         <button id="btnPause" class="rounded-2xl px-4 py-2 bg-slate-200 text-slate-800" disabled>일시정지</button>
-        <button id="btnStop"  class="rounded-2xl px-4 py-2 bg-slate-800 text-white" disabled>종료</button>
-        <button id="btnSave" class="rounded-2xl px-4 py-2 bg-emerald-600 text-white shadow" disabled>저장(.webm)</button>
-        <!-- 🔽 새로 추가된 초기화 버튼 -->
+        <button id="btnStop" class="rounded-2xl px-4 py-2 bg-slate-800 text-white" disabled>종료</button>
+        <button id="btnSave" class="rounded-2xl px-4 py-2 bg-emerald-600 text-white shadow" disabled>저장</button>
         <button id="btnClearTranscript" class="rounded-2xl px-4 py-2 bg-orange-500 text-white shadow">학생답변창 초기화</button>
         <span id="time" class="text-sm text-slate-500 ml-2">00:00</span>
       </div>
+
+      <p id="saveHelp" class="hint mt-2">
+        녹화가 끝나면 '저장' 버튼이 활성화됩니다. iPad에서는 '파일에 저장'을 선택할 수 있습니다.
+      </p>
     </section>
 
     <!-- 실시간 학생답변 + 피드백 -->
@@ -95,9 +99,10 @@
         <button id="btnFeedbackAlpha" class="rounded-xl px-3 py-2 bg-indigo-600 text-white md:flex-1">AI 피드백 알파</button>
         <button id="btnFeedbackBeta" class="rounded-xl px-3 py-2 bg-violet-700 text-white md:flex-1">AI 피드백 베타</button>
       </div>
+
       <p class="hint mt-1">
-        알파 : gpt-4o-mini로 <b>피드백</b>을 바로 생성 /
-        베타 : <b>GPTs 링크</b>를 새 창으로 열고, 열린 창에 자동 복사된 학생답변을 <b>Ctrl+V</b>로 붙여넣기
+        알파 : <b>피드백</b>을 바로 생성 /
+        베타 : <b>AI 피드백 베타 버튼 클릭</b>이미 자동 복사된 학생답변을 <b>Ctrl+V</b>로 붙여넣기
       </p>
 
       <div id="feedbackBox" class="mt-3 hidden">
@@ -127,109 +132,470 @@ const timeEl = $('time');
 const transcript = $('transcript');
 const feedback = $('feedback');
 const feedbackBox = $('feedbackBox');
-const btnRecord = $('btnRecord'), btnPause=$('btnPause'), btnStop=$('btnStop'), btnSave=$('btnSave');
+const recordStatus = $('recordStatus');
+const saveHelp = $('saveHelp');
+
+const btnRecord = $('btnRecord');
+const btnPause = $('btnPause');
+const btnStop = $('btnStop');
+const btnSave = $('btnSave');
+
 const btnFeedbackAlpha = $('btnFeedbackAlpha');
 const btnFeedbackBeta = $('btnFeedbackBeta');
-const studentName=$('studentName'), nickname=$('nickname'), gender=$('gender');
-const university=$('university');   
-const major=$('major');
-const questionPreset=$('questionPreset'), questionCustom=$('questionCustom');
-const btnClearTranscript = $('btnClearTranscript'); // 🔽 새 버튼 요소
+
+const studentName = $('studentName');
+const nickname = $('nickname');
+const gender = $('gender');
+const university = $('university');
+const major = $('major');
+const questionPreset = $('questionPreset');
+const questionCustom = $('questionCustom');
+const btnClearTranscript = $('btnClearTranscript');
 
 // 상태
-let stream, mediaRecorder, chunks=[], isRecording=false, timerId, startMs=0;
-let recognition, speechSupported=false;
+let stream = null;
+let mediaRecorder = null;
+let chunks = [];
+let recordedBlob = null;
+let recordedMimeType = '';
+let isRecording = false;
+let timerId = null;
+let startMs = 0;
+let elapsedBeforePause = 0;
+
+let recognition = null;
+let speechSupported = false;
 let finalText = "";
 
-// 타이머
-function fmt(sec){ const m=String(Math.floor(sec/60)).padStart(2,'0'); const s=String(sec%60).padStart(2,'0'); return `${m}:${s}`; }
-function startTimer(){ startMs=Date.now(); timerId=setInterval(()=>{ const sec=Math.floor((Date.now()-startMs)/1000); timeEl.textContent=fmt(sec); },300); }
-function stopTimer(){ clearInterval(timerId); }
+// ------------------------------------------------------------
+// 공통 유틸리티
+// ------------------------------------------------------------
 
+function fmt(sec){
+  const m = String(Math.floor(sec / 60)).padStart(2,'0');
+  const s = String(sec % 60).padStart(2,'0');
+  return `${m}:${s}`;
+}
+
+function startTimer(){
+  const base = elapsedBeforePause;
+  startMs = Date.now();
+
+  clearInterval(timerId);
+  timerId = setInterval(() => {
+    const sec = base + Math.floor((Date.now() - startMs) / 1000);
+    timeEl.textContent = fmt(sec);
+  }, 300);
+}
+
+function stopTimer(){
+  clearInterval(timerId);
+  timerId = null;
+}
+
+function resetTimer(){
+  stopTimer();
+  elapsedBeforePause = 0;
+  timeEl.textContent = '00:00';
+}
+
+function updateElapsedBeforePause(){
+  elapsedBeforePause += Math.floor((Date.now() - startMs) / 1000);
+}
+
+function safeFileName(name){
+  return String(name || 'student')
+    .replace(/[\\/:*?"<>|]/g, '_')
+    .replace(/\s+/g, '_')
+    .slice(0, 80);
+}
+
+// 현재 브라우저가 실제로 녹화할 수 있는 MIME 타입을 검사합니다.
+// iPad/Safari에서는 MP4를 우선 시도하고, WebM을 차선으로 사용합니다.
+function getSupportedMimeType(){
+  if (!window.MediaRecorder) return '';
+
+  const candidates = [
+    // Safari/iPad 최신 버전
+    'video/mp4;codecs="avc1.42E01E,mp4a.40.2"',
+    'video/mp4;codecs="avc1.4D401E,mp4a.40.2"',
+    'video/mp4',
+
+    // Chrome/Edge 및 최신 Safari
+    'video/webm;codecs=vp9,opus',
+    'video/webm;codecs=vp8,opus',
+    'video/webm'
+  ];
+
+  for (const type of candidates){
+    try {
+      if (MediaRecorder.isTypeSupported(type)) {
+        return type;
+      }
+    } catch(e){}
+  }
+
+  return '';
+}
+
+function getExtension(mimeType){
+  return String(mimeType).toLowerCase().includes('mp4') ? 'mp4' : 'webm';
+}
+
+function isIOSorIPad(){
+  return /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+}
+
+function setStatus(message){
+  recordStatus.textContent = message;
+}
+
+// ------------------------------------------------------------
 // 음성 인식
+// ------------------------------------------------------------
+
 (function initSR(){
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (!SR) return;
+
   recognition = new SR();
   recognition.lang = 'ko-KR';
   recognition.continuous = true;
   recognition.interimResults = true;
+
   recognition.onresult = e => {
-    let interim='';
-    for (let i=e.resultIndex; i<e.results.length; i++){
-      const tr=e.results[i][0].transcript;
-      if (e.results[i].isFinal) finalText += tr + ' ';
-      else interim += tr;
+    let interim = '';
+
+    for (let i = e.resultIndex; i < e.results.length; i++){
+      const tr = e.results[i][0].transcript;
+
+      if (e.results[i].isFinal) {
+        finalText += tr + ' ';
+      } else {
+        interim += tr;
+      }
     }
+
     transcript.value = (finalText + interim).trim();
   };
-  recognition.onend = ()=>{ 
+
+  recognition.onerror = e => {
+    // 음성인식이 잠깐 끊겨도 영상 녹화는 계속합니다.
+    console.log('SpeechRecognition error:', e.error);
+  };
+
+  recognition.onend = () => {
     if (isRecording) {
-      try { recognition.start(); } catch(e){}
+      // Safari/Chrome에서 음성인식 세션이 끝나는 경우 재시작
+      setTimeout(() => {
+        if (isRecording && recognition) {
+          try { recognition.start(); } catch(e){}
+        }
+      }, 150);
     }
   };
+
   speechSupported = true;
 })();
 
+// ------------------------------------------------------------
+// 녹화 시작
+// ------------------------------------------------------------
+
 async function startRec(){
-  finalText = "";
-  transcript.value = "";
-  stream = await navigator.mediaDevices.getUserMedia({ audio:true, video:true });
-  preview.srcObject = stream;
+  if (isRecording) return;
 
-  const mime = MediaRecorder.isTypeSupported('video/webm;codecs=vp9,opus') ?
-               'video/webm;codecs=vp9,opus' : 'video/webm;codecs=vp8,opus';
-  mediaRecorder = new MediaRecorder(stream, { mimeType: mime });
-  chunks = [];
-  mediaRecorder.ondataavailable = e => { if (e.data && e.data.size>0) chunks.push(e.data); };
-  mediaRecorder.onstop = () => { btnSave.disabled = chunks.length===0; };
+  try {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      throw new Error('이 브라우저에서는 카메라/마이크 기능을 사용할 수 없습니다. HTTPS 주소의 Safari 또는 Chrome을 사용해 주세요.');
+    }
 
-  mediaRecorder.start();
-  isRecording = true;
-  btnRecord.disabled = true; btnPause.disabled=false; btnStop.disabled=false;
-  startTimer();
-  if (speechSupported) try{ recognition.start(); }catch(e){}
+    if (!window.MediaRecorder) {
+      throw new Error('이 브라우저에서는 영상 녹화를 지원하지 않습니다.');
+    }
+
+    const mime = getSupportedMimeType();
+
+    if (!mime) {
+      throw new Error('이 기기/브라우저에서 사용할 수 있는 영상 녹화 형식을 찾지 못했습니다. Safari 또는 Chrome을 최신 버전으로 업데이트해 주세요.');
+    }
+
+    finalText = "";
+    transcript.value = "";
+    chunks = [];
+    recordedBlob = null;
+    recordedMimeType = '';
+
+    btnSave.disabled = true;
+    setStatus(`녹화 준비 중 (${getExtension(mime).toUpperCase()})...`);
+
+    stream = await navigator.mediaDevices.getUserMedia({
+      audio: true,
+      video: {
+        facingMode: 'user'
+      }
+    });
+
+    preview.srcObject = stream;
+
+    // 실제 생성된 MIME 타입은 mediaRecorder.mimeType에서 다시 확인합니다.
+    mediaRecorder = new MediaRecorder(stream, {
+      mimeType: mime
+    });
+
+    chunks = [];
+
+    mediaRecorder.onstart = () => {
+      setStatus(`녹화 중 · ${getExtension(mediaRecorder.mimeType || mime).toUpperCase()}`);
+    };
+
+    mediaRecorder.ondataavailable = e => {
+      if (e.data && e.data.size > 0) {
+        chunks.push(e.data);
+      }
+    };
+
+    mediaRecorder.onerror = e => {
+      console.error('MediaRecorder error:', e);
+      setStatus('녹화 중 오류가 발생했습니다.');
+    };
+
+    mediaRecorder.onstop = () => {
+      // stop() 직후가 아니라 마지막 dataavailable까지 받은 다음 실행됩니다.
+      recordedMimeType = mediaRecorder.mimeType || mime;
+
+      if (chunks.length > 0) {
+        recordedBlob = new Blob(chunks, {
+          type: recordedMimeType
+        });
+
+        btnSave.disabled = recordedBlob.size === 0;
+
+        if (recordedBlob.size > 0) {
+          const mb = (recordedBlob.size / (1024 * 1024)).toFixed(1);
+          setStatus(`녹화 완료 · ${getExtension(recordedMimeType).toUpperCase()} · ${mb} MB`);
+
+          if (isIOSorIPad()) {
+            saveHelp.textContent = 'iPad에서는 저장 버튼을 누른 뒤 공유 화면에서 「파일에 저장」을 선택하세요.';
+          } else {
+            saveHelp.textContent = '저장 버튼을 누르면 녹화 파일이 다운로드됩니다.';
+          }
+        } else {
+          setStatus('녹화 데이터가 비어 있습니다. 다시 녹화해 주세요.');
+        }
+      } else {
+        recordedBlob = null;
+        btnSave.disabled = true;
+        setStatus('녹화 데이터가 생성되지 않았습니다. 다시 녹화해 주세요.');
+      }
+    };
+
+    // 1초 단위로 데이터를 받습니다.
+    // 마지막 조각은 stop 이벤트 전에 dataavailable로 전달됩니다.
+    mediaRecorder.start(1000);
+
+    isRecording = true;
+    elapsedBeforePause = 0;
+
+    btnRecord.disabled = true;
+    btnPause.disabled = false;
+    btnStop.disabled = false;
+    btnSave.disabled = true;
+    btnPause.textContent = '일시정지';
+
+    startTimer();
+
+    if (speechSupported && recognition) {
+      try { recognition.start(); } catch(e){}
+    }
+
+  } catch (e) {
+    console.error(e);
+
+    if (stream) {
+      stream.getTracks().forEach(t => t.stop());
+      stream = null;
+    }
+
+    isRecording = false;
+    btnRecord.disabled = false;
+    btnPause.disabled = true;
+    btnStop.disabled = true;
+    btnSave.disabled = true;
+
+    setStatus('녹화 시작 실패');
+    alert('카메라/마이크/녹화 시작에 실패했습니다.\n\n' + (e.message || e));
+  }
 }
+
+// ------------------------------------------------------------
+// 일시정지 / 재개
+// ------------------------------------------------------------
 
 function pauseRec(){
   if (!mediaRecorder) return;
-  if (mediaRecorder.state==='recording'){
-    mediaRecorder.pause(); stopTimer(); if (speechSupported) try{ recognition.stop(); }catch(e){}
-    btnPause.textContent='재개';
-  } else if (mediaRecorder.state==='paused'){
-    mediaRecorder.resume(); startTimer(); if (speechSupported) try{ recognition.start(); }catch(e){}
-    btnPause.textContent='일시정지';
+
+  if (mediaRecorder.state === 'recording'){
+    try {
+      mediaRecorder.pause();
+      updateElapsedBeforePause();
+      stopTimer();
+
+      if (speechSupported && recognition) {
+        try { recognition.stop(); } catch(e){}
+      }
+
+      btnPause.textContent = '재개';
+      setStatus('일시정지 중');
+    } catch(e) {
+      console.error(e);
+    }
+
+  } else if (mediaRecorder.state === 'paused'){
+    try {
+      mediaRecorder.resume();
+
+      if (speechSupported && recognition) {
+        try { recognition.start(); } catch(e){}
+      }
+
+      btnPause.textContent = '일시정지';
+      setStatus(`녹화 중 · ${getExtension(mediaRecorder.mimeType).toUpperCase()}`);
+      startTimer();
+    } catch(e) {
+      console.error(e);
+    }
   }
 }
+
+// ------------------------------------------------------------
+// 녹화 종료
+// ------------------------------------------------------------
 
 function stopRec(){
   if (!mediaRecorder) return;
-  try{ mediaRecorder.stop(); }catch(e){}
-  if (stream) stream.getTracks().forEach(t=>t.stop());
+
+  if (mediaRecorder.state === 'inactive') return;
+
+  isRecording = false;
+  stopTimer();
+
   if (speechSupported && recognition) {
     try { recognition.stop(); } catch(e){}
   }
-  isRecording=false; stopTimer();
-  btnRecord.disabled=false; btnPause.disabled=true; btnStop.disabled=true; btnPause.textContent='일시정지';
-  btnSave.disabled = false;
+
+  // 중요:
+  // 여기서 stream을 즉시 끊지 않습니다.
+  // MediaRecorder가 마지막 dataavailable을 처리한 뒤 onstop에서 정리합니다.
+  try {
+    mediaRecorder.stop();
+  } catch(e) {
+    console.error(e);
+  }
+
+  btnRecord.disabled = false;
+  btnPause.disabled = true;
+  btnStop.disabled = true;
+  btnPause.textContent = '일시정지';
+  btnSave.disabled = true;
+
+  setStatus('녹화 파일을 정리하는 중...');
+
+  // 실제 stream 종료는 약간 뒤에 처리합니다.
+  setTimeout(() => {
+    if (stream) {
+      stream.getTracks().forEach(t => t.stop());
+      stream = null;
+    }
+  }, 100);
 }
 
-function saveBlob(){
-  if (!chunks.length) return alert('저장할 녹화가 없습니다.');
-  const blob = new Blob(chunks, { type: 'video/webm' });
+// ------------------------------------------------------------
+// 저장
+// ------------------------------------------------------------
+
+async function saveBlob(){
+  if (!recordedBlob || recordedBlob.size === 0) {
+    alert('저장할 녹화가 없습니다. 먼저 녹화를 종료해 주세요.');
+    return;
+  }
+
+  const mimeType = recordedMimeType || recordedBlob.type || 'video/webm';
+  const ext = getExtension(mimeType);
+
+  const timestamp = new Date()
+    .toISOString()
+    .slice(0,19)
+    .replace(/[:T]/g,'-');
+
+  const safeName = safeFileName(studentName.value || 'student');
+  const fileName = `${timestamp}_${safeName}.${ext}`;
+
+  // iPad/iPhone Safari:
+  // 파일 공유가 가능하면 iOS 공유 시트를 띄워
+  // 사용자가 '파일에 저장'을 선택하도록 합니다.
+  if (isIOSorIPad() && navigator.share && navigator.canShare && typeof File !== 'undefined') {
+    try {
+      const file = new File([recordedBlob], fileName, {
+        type: mimeType
+      });
+
+      if (navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          files: [file],
+          title: '모의면접 녹화 영상',
+          text: fileName
+        });
+
+        setStatus('저장/공유 화면을 열었습니다.');
+        return;
+      }
+    } catch (e) {
+      // 사용자가 공유 화면을 취소한 경우도 있으므로
+      // 바로 오류로 처리하지 않고 아래의 다운로드 방식으로 한 번 더 시도합니다.
+      console.log('iOS share cancelled/unavailable:', e);
+    }
+  }
+
+  // PC Chrome / Edge / Firefox 및 일부 Safari 환경
+  const url = URL.createObjectURL(recordedBlob);
   const a = document.createElement('a');
-  const name = `${new Date().toISOString().slice(0,19).replace(/[:T]/g,'-')}_${studentName.value||'student'}.webm`;
-  a.href = URL.createObjectURL(blob); a.download = name; a.click();
-  setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
+
+  a.href = url;
+  a.download = fileName;
+  a.style.display = 'none';
+
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+
+  // Safari에서 너무 빨리 revoke하지 않도록 충분히 기다립니다.
+  setTimeout(() => URL.revokeObjectURL(url), 10000);
+
+  setStatus(`저장 요청 완료 · ${fileName}`);
+
+  // iPad에서 Share API를 사용할 수 없는 구형 환경의 fallback
+  if (isIOSorIPad()) {
+    setTimeout(() => {
+      alert('파일 저장 창이 바로 나타나지 않으면, 열린 영상 화면에서 공유 버튼을 눌러 「파일에 저장」을 선택해 주세요.');
+    }, 300);
+  }
 }
 
-// 공통: 실제로 사용할 질문 문자열
+// ------------------------------------------------------------
+// 질문
+// ------------------------------------------------------------
+
 function currentQuestion(){
   const custom = questionCustom.value.trim();
   return custom ? custom : (questionPreset.value || '미지정');
 }
 
+// ------------------------------------------------------------
 // 알파: gpt-4o-mini (Worker)
+// ------------------------------------------------------------
+
 btnFeedbackAlpha.onclick = async () => {
   const payload = {
     studentName: studentName.value,
@@ -239,6 +605,7 @@ btnFeedbackAlpha.onclick = async () => {
     question: currentQuestion(),
     transcript: transcript.value
   };
+
   if (!payload.transcript) return alert('답변이 비어 있습니다.');
 
   feedbackBox.classList.remove('hidden');
@@ -246,23 +613,33 @@ btnFeedbackAlpha.onclick = async () => {
 
   try {
     const key = localStorage.getItem('mm_key') || '';
+
     const res = await fetch(ENDPOINT, {
       method:'POST',
-      headers: { 'Content-Type':'application/json', 'Authorization': 'Bearer ' + key },
+      headers: {
+        'Content-Type':'application/json',
+        'Authorization': 'Bearer ' + key
+      },
       body: JSON.stringify(payload)
     });
+
     if (!res.ok) {
       const msg = await res.text().catch(()=>'');
       throw new Error(`서버 응답 오류 (${res.status}): ${msg}`);
     }
+
     const data = await res.json();
     feedback.textContent = (data.feedback || '피드백을 불러올 수 없습니다.').trim();
+
   } catch (e) {
     feedback.textContent = '오류: ' + e.message;
   }
 };
 
+// ------------------------------------------------------------
 // 베타: ChatGPTs 새 창 열기 + 클립보드 자동 복사
+// ------------------------------------------------------------
+
 btnFeedbackBeta.onclick = async () => {
   const majorVal = major.value || '미지정';
   const q = currentQuestion();
@@ -289,16 +666,19 @@ btnFeedbackBeta.onclick = async () => {
   } catch (e) {
     alert('클립보드 복사에 실패했습니다. 페이지 권한을 확인하세요.');
   }
+
   window.open(GPTS_URL, '_blank', 'noopener,noreferrer');
 };
 
+// ------------------------------------------------------------
 // 버튼 연결
-btnRecord.onclick = startRec;
-btnPause.onclick  = pauseRec;
-btnStop.onclick   = stopRec;
-btnSave.onclick   = saveBlob;
+// ------------------------------------------------------------
 
-// 🔽 초기화 버튼 이벤트
+btnRecord.onclick = startRec;
+btnPause.onclick = pauseRec;
+btnStop.onclick = stopRec;
+btnSave.onclick = saveBlob;
+
 btnClearTranscript.onclick = () => {
   if (confirm('실시간 받아쓰기 내용을 모두 삭제하시겠습니까?')) {
     finalText = "";
